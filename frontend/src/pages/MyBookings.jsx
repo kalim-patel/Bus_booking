@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import { api } from "../services/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Sidebar, MobileNav } from "../components/Sidebar.jsx";
-import { Loader } from "../components/Loader.jsx";
+import { SkeletonList } from "../components/SkeletonLoader.jsx";
+import { EmptyState, BookingsEmptyIcon } from "../components/EmptyState.jsx";
 
 export default function MyBookings() {
   const { user, logout } = useAuth();
@@ -91,20 +92,15 @@ export default function MyBookings() {
           </div>
 
           {loading ? (
-            <Loader label="Loading bookings…" />
+            <SkeletonList count={2} />
           ) : bookings.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-600 dark:bg-slate-800">
-              <p className="font-display text-lg font-semibold text-slate-900 dark:text-white">No bookings yet</p>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                You haven't booked any tickets yet. Search for buses and complete your first booking.
-              </p>
-              <Link
-                to="/dashboard"
-                className="mt-6 inline-flex rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white hover:bg-sky-500 dark:bg-sky-500"
-              >
-                Search Buses
-              </Link>
-            </div>
+            <EmptyState
+              icon={<BookingsEmptyIcon />}
+              title="No bookings yet."
+              description="You haven't booked any tickets yet. Search for buses and complete your first booking."
+              actionLabel="Book Now"
+              actionTo="/dashboard"
+            />
           ) : (
             <div className="space-y-4">
               {bookings.map((booking) => (
@@ -171,7 +167,13 @@ export default function MyBookings() {
                     </div>
 
                     {booking.status === "confirmed" && (
-                      <div className="flex sm:flex-col sm:gap-2">
+                      <div className="flex flex-wrap gap-2 sm:flex-col">
+                        <Link
+                          to={`/ticket/${booking._id}`}
+                          className="rounded-xl border border-sky-200 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-sky-800 dark:text-sky-400 dark:hover:bg-sky-900/30"
+                        >
+                          View Ticket
+                        </Link>
                         <button
                           type="button"
                           onClick={() => handleCancel(booking._id)}

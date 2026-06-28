@@ -62,15 +62,24 @@ export default function SignUp() {
 
   const field = (label, name, type = "text", extra = {}) => (
     <div>
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
+      <label htmlFor={`signup-${name}`} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        {label}
+      </label>
       <input
+        id={`signup-${name}`}
         type={type}
         value={form[name]}
         onChange={set(name)}
+        aria-invalid={Boolean(errors[name])}
+        aria-describedby={errors[name] ? `signup-${name}-error` : undefined}
         className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 outline-none ring-sky-500/30 transition focus:border-sky-500 focus:ring-4 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
         {...extra}
       />
-      {errors[name] && <p className="mt-1 text-xs text-rose-600">{errors[name]}</p>}
+      {errors[name] && (
+        <p id={`signup-${name}-error`} className="mt-1 text-xs text-rose-600" role="alert">
+          {errors[name]}
+        </p>
+      )}
     </div>
   );
 
@@ -82,7 +91,7 @@ export default function SignUp() {
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Create your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
           {field("Username", "username")}
           {field("Email", "email", "email")}
           <div>

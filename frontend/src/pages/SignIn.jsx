@@ -61,27 +61,41 @@ export default function SignIn() {
           <p className="mt-1 text-sm text-slate-500">Sign in to continue</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
           <div>
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+            <label htmlFor="signin-email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Email
+            </label>
             <input
+              id="signin-email"
               type="email"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "signin-email-error" : undefined}
               className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 outline-none ring-sky-500/30 transition focus:border-sky-500 focus:ring-4 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
             />
-            {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email}</p>}
+            {errors.email && (
+              <p id="signin-email-error" className="mt-1 text-xs text-rose-600" role="alert">
+                {errors.email}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+            <label htmlFor="signin-password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Password
+            </label>
             <div className="relative mt-1">
               <input
+                id="signin-password"
                 type={show ? "text" : "password"}
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "signin-password-error" : undefined}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 pr-24 text-slate-900 outline-none ring-sky-500/30 transition focus:border-sky-500 focus:ring-4 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
               />
               <button
@@ -92,7 +106,11 @@ export default function SignIn() {
                 {show ? "Hide" : "Show"}
               </button>
             </div>
-            {errors.password && <p className="mt-1 text-xs text-rose-600">{errors.password}</p>}
+            {errors.password && (
+              <p id="signin-password-error" className="mt-1 text-xs text-rose-600" role="alert">
+                {errors.password}
+              </p>
+            )}
           </div>
 
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">

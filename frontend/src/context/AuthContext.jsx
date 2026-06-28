@@ -39,6 +39,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const setUserAndPersist = (newUser) => {
+    localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -47,6 +52,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(token),
       login,
       logout,
+      setUser: setUserAndPersist,
     }),
     [user, token, ready]
   );

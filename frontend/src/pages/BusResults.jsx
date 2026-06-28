@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { api } from "../services/api.js";
 import { BusCard } from "../components/BusCard.jsx";
-import { Loader } from "../components/Loader.jsx";
+import { SkeletonCard } from "../components/SkeletonLoader.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 function departureHour(timeStr) {
@@ -214,7 +214,11 @@ export default function BusResults() {
         </div>
 
         {loading ? (
-          <Loader label="Fetching buses…" />
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-600 dark:bg-slate-800">
             <p className="font-display text-lg font-semibold text-slate-900 dark:text-white">No buses found</p>

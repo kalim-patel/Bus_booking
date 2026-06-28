@@ -61,18 +61,27 @@ export default function Profile() {
 
   const field = (label, name, type = "text", extra = {}) => (
     <div>
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
+      <label htmlFor={`profile-${name}`} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        {label}
+      </label>
       <input
+        id={`profile-${name}`}
         type={type}
         value={form[name]}
         onChange={set(name)}
         disabled={name === "email"}
+        aria-invalid={Boolean(errors[name])}
+        aria-describedby={errors[name] ? `profile-${name}-error` : undefined}
         className={`mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-slate-900 outline-none ring-sky-500/30 transition focus:border-sky-500 focus:ring-4 disabled:bg-slate-100 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:disabled:bg-slate-800 ${
           name === "email" ? "bg-slate-50 dark:bg-slate-800" : ""
         }`}
         {...extra}
       />
-      {errors[name] && <p className="mt-1 text-xs text-rose-600">{errors[name]}</p>}
+      {errors[name] && (
+        <p id={`profile-${name}-error`} className="mt-1 text-xs text-rose-600" role="alert">
+          {errors[name]}
+        </p>
+      )}
     </div>
   );
 

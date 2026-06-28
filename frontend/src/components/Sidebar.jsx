@@ -17,13 +17,16 @@ export function Sidebar({ onLogout }) {
         <Link to="/profile" className={item}>
           Profile
         </Link>
+        <Link to="/support" className={item}>
+          Support
+        </Link>
         <button type="button" className={`${item} w-full text-left text-rose-600 dark:text-rose-400`} onClick={onLogout}>
           Logout
         </button>
       </nav>
       <div className="mt-8 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-50 p-4 text-xs text-slate-600 dark:from-slate-700/50 dark:to-indigo-900/30 dark:text-slate-400">
         <p className="font-semibold text-slate-800 dark:text-slate-200">Need help?</p>
-        <p className="mt-1">Visit our help center or call support for route updates.</p>
+        <p className="mt-1">Visit our <Link to="/faq" className="font-semibold text-sky-700 hover:underline dark:text-sky-400">FAQ</Link> or <Link to="/support" className="font-semibold text-sky-700 hover:underline dark:text-sky-400">Support</Link> page.</p>
       </div>
     </aside>
   );

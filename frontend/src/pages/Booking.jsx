@@ -21,7 +21,7 @@ export default function Booking() {
   const [passengerNames, setPassengerNames] = useState(() => [user?.username?.trim() || ""]);
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [submitting, setSubmitting] = useState(false);
-  const [bookingResult, setBookingResult] = useState(null);
+  const [passengerErrors, setPassengerErrors] = useState([]);
 
   const maxSeats = useMemo(() => Math.min(6, bus?.seatsAvailable || 6), [bus?.seatsAvailable]);
 
@@ -56,6 +56,15 @@ export default function Booking() {
   const total = bus.price * seatCount;
 
   const canGoStep2 = Boolean(from && to && date);
+
+  const validatePassengers = () => {
+    const errs = passengerNames.slice(0, seatCount).map((n) =>
+      n.trim().length >= 2 ? "" : "Name must be at least 2 characters."
+    );
+    setPassengerErrors(errs);
+    return errs.every((e) => !e);
+  };
+
   const canGoStep3 = passengerNames.slice(0, seatCount).every((n) => n.trim().length >= 2);
 
   const submitBooking = async () => {
@@ -67,81 +76,14 @@ export default function Booking() {
         seatCount,
         passengers: passengerNames.slice(0, seatCount).map((fullName) => ({ fullName: fullName.trim() })),
       });
-      setBookingResult(data.booking);
       toast.success("Ticket booked!");
+      navigate("/booking-success", { replace: true, state: { booking: data.booking } });
     } catch (e) {
       toast.error(e.message);
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (bookingResult) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <header className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-          <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-            <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">You&apos;re booked</h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Confirmation for {bookingResult.bus?.busName}</p>
-          </div>
-        </header>
-        <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-          <div className="rounded-3xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-800">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Booking reference</p>
-            <p className="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">{bookingResult._id}</p>
-            <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Route</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">
-                  {bookingResult.bus?.from} → {bookingResult.bus?.to}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Travel date</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">{bookingResult.travelDate}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Departure</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">{bookingResult.bus?.departureTime}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Seats</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">{bookingResult.seatCount}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Passengers</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">
-                  {bookingResult.passengers?.map((p) => p.fullName).join(", ")}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-slate-500 dark:text-slate-400">Amount paid</dt>
-                <dd className="font-semibold text-slate-900 dark:text-slate-200">₹{bookingResult.totalAmount}</dd>
-              </div>
-            </dl>
-            <p className="mt-6 text-xs text-slate-500 dark:text-slate-400">
-              Payment was simulated for this demo. A real app would redirect to a payment gateway here.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/dashboard"
-                className="inline-flex rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:from-sky-500 hover:to-indigo-500 dark:from-sky-500 dark:to-indigo-500"
-              >
-                Back to dashboard
-              </Link>
-              <Link
-                to="/bus-results"
-                state={{ from, to, date }}
-                className="inline-flex rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
-              >
-                Search more buses
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -244,8 +186,11 @@ export default function Booking() {
               <div className="space-y-3">
                 {passengerNames.slice(0, seatCount).map((name, idx) => (
                   <div key={idx}>
-                    <label className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Passenger {idx + 1}</label>
+                    <label htmlFor={`passenger-${idx}`} className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                      Passenger {idx + 1}
+                    </label>
                     <input
+                      id={`passenger-${idx}`}
                       type="text"
                       value={name}
                       onChange={(e) => {
@@ -255,10 +200,24 @@ export default function Booking() {
                           next[idx] = v;
                           return next;
                         });
+                        if (passengerErrors[idx]) {
+                          setPassengerErrors((prev) => {
+                            const next = [...prev];
+                            next[idx] = v.trim().length >= 2 ? "" : "Name must be at least 2 characters.";
+                            return next;
+                          });
+                        }
                       }}
                       placeholder="Full name as on ID"
+                      aria-invalid={Boolean(passengerErrors[idx])}
+                      aria-describedby={passengerErrors[idx] ? `passenger-${idx}-error` : undefined}
                       className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                     />
+                    {passengerErrors[idx] && (
+                      <p id={`passenger-${idx}-error`} className="mt-1 text-xs text-rose-600" role="alert">
+                        {passengerErrors[idx]}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -273,7 +232,9 @@ export default function Booking() {
                 <button
                   type="button"
                   disabled={!canGoStep3}
-                  onClick={() => setStep(3)}
+                  onClick={() => {
+                    if (validatePassengers()) setStep(3);
+                  }}
                   className="rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:from-sky-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:from-sky-500 dark:to-indigo-500"
                 >
                   Continue to payment

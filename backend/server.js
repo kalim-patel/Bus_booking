@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import busRoutes from "./routes/busRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 import { seedBusesIfEmpty } from "./controllers/busController.js";
 
 const app = express();
@@ -27,6 +28,7 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, name: "BUS TRACK API"
 app.use("/api/auth", authRoutes);
 app.use("/api/buses", busRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });

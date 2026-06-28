@@ -68,6 +68,34 @@ export async function createBooking(req, res) {
   }
 }
 
+/** GET /api/bookings/:id */
+export async function getBookingById(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid booking ID." });
+    }
+
+    const booking = await Booking.findById(id)
+      .populate("bus", "busName busNumber from to departureTime arrivalTime duration price busType")
+      .lean();
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    if (booking.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only view your own bookings." });
+    }
+
+    return res.json({ booking });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to load booking." });
+  }
+}
+
 /** GET /api/bookings/mine */
 export async function getMyBookings(req, res) {
   try {
