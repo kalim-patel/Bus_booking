@@ -150,7 +150,10 @@ export default function MyBookings() {
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Seats</p>
                           <p className="font-semibold text-slate-800 dark:text-slate-200">
-                            {booking.seatCount} seat{booking.seatCount > 1 ? "s" : ""}
+                            {booking.seatNumbers?.length > 0 
+                              ? booking.seatNumbers.sort().join(", ") 
+                              : `${booking.seatCount} seat${booking.seatCount > 1 ? "s" : ""}`
+                            }
                           </p>
                         </div>
                         <div>

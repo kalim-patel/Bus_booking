@@ -58,7 +58,10 @@ export default function BookingSuccess() {
             <div>
               <dt className="text-slate-500 dark:text-slate-400">Seat{booking.seatCount > 1 ? "s" : ""}</dt>
               <dd className="font-semibold text-slate-900 dark:text-slate-200">
-                {passengers.map((_, i) => seatLabel(i)).join(", ")}
+                {booking.seatNumbers?.length > 0 
+                  ? booking.seatNumbers.sort().join(", ") 
+                  : passengers.map((_, i) => seatLabel(i)).join(", ")
+                }
               </dd>
             </div>
             <div>

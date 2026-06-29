@@ -4,6 +4,9 @@ import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import BusResults from "./pages/BusResults.jsx";
+import BusDetails from "./pages/BusDetails.jsx";
+import SeatSelection from "./pages/SeatSelection.jsx";
+import BookingSummary from "./pages/BookingSummary.jsx";
 import Booking from "./pages/Booking.jsx";
 import BookingSuccess from "./pages/BookingSuccess.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
@@ -41,6 +44,30 @@ export default function App() {
         element={
           <PrivateRoute>
             <BusResults />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/bus-details"
+        element={
+          <PrivateRoute>
+            <BusDetails />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/seat-selection"
+        element={
+          <PrivateRoute>
+            <SeatSelection />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/booking-summary"
+        element={
+          <PrivateRoute>
+            <BookingSummary />
           </PrivateRoute>
         }
       />

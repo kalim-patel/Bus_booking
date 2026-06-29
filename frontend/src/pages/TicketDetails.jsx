@@ -135,7 +135,9 @@ export default function TicketDetails() {
                   className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm dark:bg-slate-700/50"
                 >
                   <span className="font-medium text-slate-900 dark:text-slate-200">{p.fullName}</span>
-                  <span className="font-semibold text-sky-700 dark:text-sky-400">Seat {seatLabel(i)}</span>
+                  <span className="font-semibold text-sky-700 dark:text-sky-400">
+                    Seat {booking.seatNumbers?.[i] || seatLabel(i)}
+                  </span>
                 </li>
               ))}
             </ul>

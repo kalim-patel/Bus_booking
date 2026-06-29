@@ -60,7 +60,7 @@ export function BusCard({ bus, onBook }) {
         disabled={!onBook || bus.seatsAvailable < 1}
         className="mt-5 w-full rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-sky-500 hover:to-indigo-500 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {bus.seatsAvailable < 1 ? "Sold out" : "BOOK NOW"}
+        {bus.seatsAvailable < 1 ? "Sold out" : "View Details"}
       </button>
     </article>
   );

@@ -245,7 +245,7 @@ export default function BusResults() {
               <BusCard
                 key={bus._id || bus.busNumber}
                 bus={bus}
-                onBook={(b) => navigate("/booking", { state: { bus: b, from, to, date } })}
+                onBook={(b) => navigate("/bus-details", { state: { bus: b, from, to, date } })}
               />
             ))}
           </div>

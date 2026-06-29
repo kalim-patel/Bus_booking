@@ -18,6 +18,7 @@ const bookingSchema = new mongoose.Schema(
       validate: [(v) => Array.isArray(v) && v.length > 0, "At least one passenger"],
     },
     seatCount: { type: Number, required: true, min: 1, max: 10 },
+    seatNumbers: { type: [String], default: [] },
     totalAmount: { type: Number, required: true, min: 0 },
     status: { type: String, enum: ["confirmed", "cancelled"], default: "confirmed" },
   },

@@ -5,11 +5,13 @@ import {
   getMyBookings,
   getBookingById,
   cancelBooking,
+  getAvailableSeats,
 } from "../controllers/bookingController.js";
 
 const router = Router();
 
 router.get("/mine", authMiddleware, getMyBookings);
+router.get("/bus/:busId/available-seats", authMiddleware, getAvailableSeats);
 router.get("/:id", authMiddleware, getBookingById);
 router.post("/", authMiddleware, createBooking);
 router.delete("/:id", authMiddleware, cancelBooking);

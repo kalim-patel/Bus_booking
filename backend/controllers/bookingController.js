@@ -5,7 +5,7 @@ import { Bus } from "../models/Bus.js";
 /** POST /api/bookings */
 export async function createBooking(req, res) {
   try {
-    const { busId, travelDate, passengers, seatCount } = req.body;
+    const { busId, travelDate, passengers, seatCount, seatNumbers } = req.body;
 
     if (!busId || !travelDate) {
       return res.status(400).json({ message: "Bus and travel date are required." });
@@ -27,6 +27,36 @@ export async function createBooking(req, res) {
     });
     if (cleaned.some((p) => p.fullName.length < 2)) {
       return res.status(400).json({ message: "Each passenger needs a name (at least 2 characters)." });
+    }
+
+    // Validate seat numbers if provided
+    let finalSeatNumbers = [];
+    if (seatNumbers && Array.isArray(seatNumbers) && seatNumbers.length > 0) {
+      if (seatNumbers.length !== count) {
+        return res.status(400).json({ message: "Number of selected seats must match passenger count." });
+      }
+      // Validate seat number format
+      const seatRegex = /^[A-Z]\d+$/;
+      if (!seatNumbers.every((s) => seatRegex.test(s))) {
+        return res.status(400).json({ message: "Invalid seat number format. Use format like A1, B2, etc." });
+      }
+      finalSeatNumbers = seatNumbers.map((s) => s.toUpperCase());
+
+      // Verify seats are not already booked
+      const existingBookings = await Booking.find({
+        bus: busId,
+        travelDate: String(travelDate).trim(),
+        status: "confirmed",
+        seatNumbers: { $in: finalSeatNumbers },
+      }).lean();
+
+      const alreadyBooked = existingBookings.flatMap((b) => b.seatNumbers || []);
+      const conflictingSeats = finalSeatNumbers.filter((s) => alreadyBooked.includes(s));
+      if (conflictingSeats.length > 0) {
+        return res.status(400).json({ 
+          message: `Seats ${conflictingSeats.join(", ")} are already booked. Please select different seats.` 
+        });
+      }
     }
 
     const bus = await Bus.findById(busId);
@@ -54,6 +84,7 @@ export async function createBooking(req, res) {
       travelDate: String(travelDate).trim(),
       passengers: cleaned,
       seatCount: count,
+      seatNumbers: finalSeatNumbers,
       totalAmount,
     });
 
@@ -107,6 +138,41 @@ export async function getMyBookings(req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Failed to load bookings." });
+  }
+}
+
+/** GET /api/bookings/bus/:busId/available-seats?date=YYYY-MM-DD */
+export async function getAvailableSeats(req, res) {
+  try {
+    const { busId } = req.params;
+    const { date } = req.query;
+
+    if (!mongoose.isValidObjectId(busId)) {
+      return res.status(400).json({ message: "Invalid bus id." });
+    }
+    if (!date) {
+      return res.status(400).json({ message: "Travel date is required." });
+    }
+
+    const bus = await Bus.findById(busId);
+    if (!bus) {
+      return res.status(404).json({ message: "Bus not found." });
+    }
+
+    // Get all confirmed bookings for this bus on this date
+    const bookings = await Booking.find({
+      bus: busId,
+      travelDate: String(date).trim(),
+      status: "confirmed",
+    }).lean();
+
+    // Extract all booked seat numbers
+    const bookedSeats = bookings.flatMap((booking) => booking.seatNumbers || []);
+
+    return res.json({ bookedSeats, totalSeats: bus.seatsAvailable });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to load available seats." });
   }
 }
 
