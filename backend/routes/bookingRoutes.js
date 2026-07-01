@@ -6,6 +6,7 @@ import {
   getBookingById,
   cancelBooking,
   getAvailableSeats,
+  submitRating,
 } from "../controllers/bookingController.js";
 
 const router = Router();
@@ -15,5 +16,6 @@ router.get("/bus/:busId/available-seats", authMiddleware, getAvailableSeats);
 router.get("/:id", authMiddleware, getBookingById);
 router.post("/", authMiddleware, createBooking);
 router.delete("/:id", authMiddleware, cancelBooking);
+router.put("/:id/rating", authMiddleware, submitRating);
 
 export default router;

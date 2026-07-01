@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api.js";
 import { SkeletonList } from "../components/SkeletonLoader.jsx";
-import { formatBookingStatus, seatLabel, statusBadgeClass } from "../utils/bookingHelpers.js";
+import { formatBookingStatus, seatLabel, statusBadgeClass, getBookingState, formatBookingState, stateBadgeClass } from "../utils/bookingHelpers.js";
 
 export default function TicketDetails() {
   const { id } = useParams();
@@ -58,6 +58,7 @@ export default function TicketDetails() {
   }
 
   const passengers = booking.passengers || [];
+  const bookingState = getBookingState(booking.travelDate, booking.status);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -74,8 +75,8 @@ export default function TicketDetails() {
             <h1 className="mt-2 font-display text-xl font-bold text-slate-900 sm:text-2xl dark:text-white">Ticket Details</h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">Read-only view · Ref {booking._id}</p>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(booking.status)}`}>
-            {formatBookingStatus(booking.status)}
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${stateBadgeClass(bookingState)}`}>
+            {formatBookingState(bookingState)}
           </span>
         </div>
       </header>
@@ -97,8 +98,8 @@ export default function TicketDetails() {
               <dd className="mt-1 font-mono font-semibold text-slate-900 dark:text-slate-200">{booking._id}</dd>
             </div>
             <div>
-              <dt className="text-xs uppercase text-slate-500 dark:text-slate-400">Booking Status</dt>
-              <dd className="mt-1 font-semibold text-slate-900 dark:text-slate-200">{formatBookingStatus(booking.status)}</dd>
+              <dt className="text-xs uppercase text-slate-500 dark:text-slate-400">Journey Status</dt>
+              <dd className="mt-1 font-semibold text-slate-900 dark:text-slate-200">{formatBookingState(bookingState)}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase text-slate-500 dark:text-slate-400">Source</dt>
@@ -142,6 +143,24 @@ export default function TicketDetails() {
               ))}
             </ul>
           </div>
+
+          {booking.rating && (
+            <div className="border-t border-slate-100 px-6 py-5 dark:border-slate-700">
+              <h3 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Your Rating</h3>
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <span className="text-amber-500 text-lg">⭐</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-200">{booking.rating}/5</span>
+                {booking.review && (
+                  <span className="text-slate-600 dark:text-slate-400">- {booking.review}</span>
+                )}
+              </div>
+              {booking.reviewDate && (
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Rated on {new Date(booking.reviewDate).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          )}
         </article>
 
         <div className="mt-6 flex flex-wrap gap-3">

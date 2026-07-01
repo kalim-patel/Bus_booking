@@ -2,6 +2,24 @@ import mongoose from "mongoose";
 import { Booking } from "../models/Booking.js";
 import { Bus } from "../models/Bus.js";
 
+/**
+ * Helper function to determine booking state based on travel date and cancellation status
+ * Returns: 'upcoming' | 'today' | 'completed' | 'cancelled'
+ */
+function getBookingState(travelDate, status) {
+  if (status === "cancelled") return "cancelled";
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const travel = new Date(travelDate);
+  travel.setHours(0, 0, 0, 0);
+  
+  if (travel.getTime() === today.getTime()) return "today";
+  if (travel.getTime() > today.getTime()) return "upcoming";
+  return "completed";
+}
+
 /** POST /api/bookings */
 export async function createBooking(req, res) {
   try {
@@ -200,6 +218,16 @@ export async function cancelBooking(req, res) {
       return res.status(400).json({ message: "Booking is already cancelled." });
     }
 
+    // Check if travel date is in the future
+    const state = getBookingState(booking.travelDate, booking.status);
+    if (state === "completed" || state === "today") {
+      return res.status(400).json({ 
+        message: state === "today" 
+          ? "Cannot cancel a booking for today's journey." 
+          : "Cannot cancel a completed journey." 
+      });
+    }
+
     // Update booking status to cancelled
     booking.status = "cancelled";
     await booking.save();
@@ -211,5 +239,59 @@ export async function cancelBooking(req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Failed to cancel booking." });
+  }
+}
+
+/** PUT /api/bookings/:id/rating – submit rating for a completed journey */
+export async function submitRating(req, res) {
+  try {
+    const { id } = req.params;
+    const { rating, review } = req.body;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid booking ID." });
+    }
+
+    // Validate rating
+    const ratingNum = Number(rating);
+    if (!Number.isInteger(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5." });
+    }
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    // Verify the booking belongs to the user
+    if (booking.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only rate your own bookings." });
+    }
+
+    // Check if already rated
+    if (booking.rating) {
+      return res.status(400).json({ message: "You have already rated this journey." });
+    }
+
+    // Check if journey is completed
+    const state = getBookingState(booking.travelDate, booking.status);
+    if (state !== "completed") {
+      return res.status(400).json({ 
+        message: "You can only rate completed journeys." 
+      });
+    }
+
+    // Update booking with rating
+    booking.rating = ratingNum;
+    if (review && typeof review === "string" && review.trim()) {
+      booking.review = review.trim();
+    }
+    booking.reviewDate = new Date();
+    await booking.save();
+
+    return res.json({ message: "Thank you for your feedback." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to submit rating." });
   }
 }

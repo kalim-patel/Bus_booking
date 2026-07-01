@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { api } from "../services/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getBookingState } from "../utils/bookingHelpers.js";
 
 export default function BookingSummary() {
   const location = useLocation();
@@ -23,8 +24,16 @@ export default function BookingSummary() {
     if (!bus?._id || !selectedSeats?.length) {
       toast.error("Invalid booking information. Please start over.");
       navigate("/dashboard", { replace: true });
+      return;
     }
-  }, [bus, selectedSeats, navigate]);
+
+    // Validate travel date is not in the past
+    const state = getBookingState(date, "confirmed");
+    if (state === "completed") {
+      toast.error("Cannot book a journey for a past date. Please select a future date.");
+      navigate("/dashboard", { replace: true });
+    }
+  }, [bus, selectedSeats, date, navigate]);
 
   if (!bus?._id || !selectedSeats?.length) {
     return (

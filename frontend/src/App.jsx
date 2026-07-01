@@ -10,6 +10,7 @@ import BookingSummary from "./pages/BookingSummary.jsx";
 import Booking from "./pages/Booking.jsx";
 import BookingSuccess from "./pages/BookingSuccess.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
+import RateJourney from "./pages/RateJourney.jsx";
 import Profile from "./pages/Profile.jsx";
 import About from "./pages/About.jsx";
 import FAQ from "./pages/FAQ.jsx";
@@ -100,6 +101,14 @@ export default function App() {
         element={
           <PrivateRoute>
             <MyBookings />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/rate-journey/:id"
+        element={
+          <PrivateRoute>
+            <RateJourney />
           </PrivateRoute>
         }
       />

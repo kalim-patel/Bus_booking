@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Sidebar, MobileNav } from "../components/Sidebar.jsx";
@@ -9,9 +9,25 @@ const STOPS = ["Pune", "Mumbai", "Kolhapur", "Satara", "Sangli", "Nashik", "Nagp
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [from, setFrom] = useState("Pune");
   const [to, setTo] = useState("Mumbai");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+
+  // Handle prefill from Book Again
+  useEffect(() => {
+    if (location.state?.prefill) {
+      const { from: prefillFrom, to: prefillTo } = location.state.prefill;
+      if (prefillFrom && STOPS.includes(prefillFrom)) {
+        setFrom(prefillFrom);
+      }
+      if (prefillTo && STOPS.includes(prefillTo)) {
+        setTo(prefillTo);
+      }
+      // Clear the prefill state after using it
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
 
   const handleLogout = () => {
     logout();

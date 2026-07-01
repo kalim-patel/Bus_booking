@@ -21,6 +21,9 @@ const bookingSchema = new mongoose.Schema(
     seatNumbers: { type: [String], default: [] },
     totalAmount: { type: Number, required: true, min: 0 },
     status: { type: String, enum: ["confirmed", "cancelled"], default: "confirmed" },
+    rating: { type: Number, min: 1, max: 5 },
+    review: { type: String, trim: true },
+    reviewDate: { type: Date },
   },
   { timestamps: true }
 );
